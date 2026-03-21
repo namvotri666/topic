@@ -1,0 +1,49 @@
+version: "3.8"
+
+services:
+  customer-service:
+    build: ./customer-service
+    ports:
+      - "5001:5001"
+    environment:
+      - PORT=5001
+
+  order-service:
+    build: ./order-service
+    ports:
+      - "5002:5002"
+    environment:
+      - PORT=5002
+
+  payment-service:
+    build: ./payment-service
+    ports:
+      - "5003:5003"
+    environment:
+      - PORT=5003
+
+  inventory-service:
+    build: ./inventory-service
+    ports:
+      - "5004:5004"
+    environment:
+      - PORT=5004
+
+  shipping-service:
+    build: ./shipping-service
+    ports:
+      - "5005:5005"
+    environment:
+      - PORT=5005
+
+  orchestrator-service:
+    build: ./orchestrator-service
+    ports:
+      - "5006:5006"
+    environment:
+      - PORT=5006
+      - CUSTOMER_URL=http://customer-service:5001
+      - ORDER_URL=http://order-service:5002
+      - PAYMENT_URL=http://payment-service:5003
+      - INVENTORY_URL=http://inventory-service:5004
+      - SHIPPING_URL=http://shipping-service:5005

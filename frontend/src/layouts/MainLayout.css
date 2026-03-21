@@ -1,0 +1,110 @@
+.layout-wrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  background: linear-gradient(-180deg, #f53d2d, #f63);
+  padding: 1rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.header-content {
+  gap: 2rem;
+}
+
+.logo {
+  color: white;
+  font-size: 1.75rem;
+  font-weight: 700;
+  text-decoration: none;
+  letter-spacing: 1px;
+}
+
+.search-bar {
+  flex: 1;
+  display: flex;
+  background: white;
+  border-radius: 2px;
+  overflow: hidden;
+  max-width: 600px;
+}
+
+.search-input {
+  flex: 1;
+  border: none;
+  padding: 0.6rem 1rem;
+  outline: none;
+  font-size: 0.9rem;
+}
+
+.search-btn {
+  background: var(--primary);
+  color: white;
+  padding: 0 1.5rem;
+  border-radius: 2px;
+  margin: 3px;
+}
+
+.search-btn:hover {
+  background: var(--primary-hover);
+}
+
+.cart-icon-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  transition: transform 0.2s;
+}
+.cart-icon-wrapper:hover {
+  transform: scale(1.05);
+}
+
+.cart-badge {
+  position: absolute;
+  top: -8px;
+  right: -10px;
+  background: white;
+  color: var(--primary);
+  font-size: 0.75rem;
+  font-weight: bold;
+  padding: 0px 6px;
+  border-radius: 10px;
+  border: 1px solid var(--primary);
+}
+
+.user-profile {
+  color: white;
+  margin-left: 1rem;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid white;
+}
+
+.username {
+  font-size: 0.875rem;
+}
+
+.logout-btn {
+  background: none;
+  color: white;
+  opacity: 0.8;
+}
+
+.logout-btn:hover {
+  opacity: 1;
+}
+
+.main-content {
+  flex: 1;
+  padding-top: 2rem;
+  padding-bottom: 4rem;
+}

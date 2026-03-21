@@ -1,0 +1,148 @@
+.status-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.status-header {
+  padding: 1.5rem;
+  background: white;
+}
+
+.status-header h2 {
+  color: var(--primary);
+  margin-bottom: 1rem;
+}
+
+.order-meta p {
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+}
+
+.saga-visualizer {
+  padding: 2rem;
+  background: white;
+}
+
+.subtitle {
+  color: var(--text-light);
+  margin-bottom: 2rem;
+  font-size: 0.9rem;
+}
+
+.stepper {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.step {
+  display: flex;
+  gap: 1.5rem;
+  min-height: 100px;
+}
+
+.step-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  width: 40px;
+}
+
+.icon-pending {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--border-color);
+  margin-top: 6px;
+}
+
+.icon-success { color: var(--success); }
+.icon-error { color: var(--error); }
+.icon-compensation { color: #f5a623; }
+.icon-processing { color: #1890ff; }
+
+.pulse {
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.1); opacity: 0.7; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.step-line {
+  flex: 1;
+  width: 2px;
+  background: var(--border-color);
+  margin: 4px 0;
+}
+
+.step.past .step-line {
+  background: var(--success);
+}
+
+.step.has-error .step-line,
+.step.is-compensation .step-line {
+  background: var(--error);
+}
+
+.step-content {
+  padding-bottom: 2rem;
+  flex: 1;
+}
+
+.step-title {
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+  color: var(--text-light);
+}
+
+.step.active .step-title,
+.step.past .step-title {
+  color: var(--text-dark);
+}
+
+.step.has-error .step-title { color: var(--error); }
+.step.is-compensation .step-title { color: #f5a623; }
+
+.service-badge {
+  display: inline-block;
+  background: #f0f0f0;
+  color: #555;
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin-bottom: 0.5rem;
+  font-family: monospace;
+}
+
+.step.active .service-badge {
+  background: #e6f7ff;
+  color: #1890ff;
+}
+
+.step.has-error .service-badge {
+  background: rgba(255, 66, 79, 0.1);
+  color: var(--error);
+}
+
+.step.is-compensation .service-badge {
+  background: rgba(245, 166, 35, 0.1);
+  color: #ce891b;
+}
+
+.step-desc {
+  font-size: 0.9rem;
+  color: var(--text-light);
+}
+
+.mt-4 { margin-top: 1rem; }
+.mt-8 { margin-top: 2rem; }
+.mb-4 { margin-bottom: 1rem; }
+.pb-8 { padding-bottom: 2rem; }
+
+.text-success { color: var(--success); }
+.text-error { color: var(--error); }

@@ -1,0 +1,90 @@
+.login-wrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.login-header {
+  background: white;
+  padding: 1rem 0;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
+
+.login-logo {
+  color: var(--primary);
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.login-body {
+  background-color: var(--primary);
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding: 2rem 0;
+}
+
+.login-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+}
+
+.login-banner {
+  flex: 1;
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .login-banner {
+    display: block;
+  }
+}
+
+.banner-img {
+  width: 100%;
+  max-width: 500px;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+
+.login-form-wrapper {
+  width: 100%;
+  max-width: 400px;
+  padding: 2.5rem 2rem;
+  background: white;
+  border-radius: 4px;
+}
+
+.login-form-wrapper h2 {
+  font-size: 1.25rem;
+  font-weight: 500;
+  margin-bottom: 1.5rem;
+}
+
+.login-error {
+  background-color: rgba(255, 66, 79, 0.1);
+  color: var(--error);
+  padding: 0.75rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid rgba(255, 66, 79, 0.3);
+}
+
+.login-form {
+  display: flex;
+}
+
+.login-form .btn-primary {
+  padding: 0.75rem;
+  font-size: 1rem;
+}
+
+.login-footer {
+  margin-top: 1.5rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: #05a;
+}
