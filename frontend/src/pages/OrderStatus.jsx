@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Navigate, Link } from 'react-router-dom';
 import { useAppContext } from '../store/AppContext';
 import { CheckCircle2, XCircle, Clock, AlertCircle } from 'lucide-react';
@@ -6,148 +6,112 @@ import './OrderStatus.css';
 
 const OrderStatus = () => {
   const { currentOrder } = useAppContext();
-  const [sagaData, setSagaData] = useState(null);
 
-  useEffect(() => {
-    if (!currentOrder || !currentOrder.sagaId) return;
-    
-    // Poll the orchestrator for saga status
-    const interval = setInterval(async () => {
-      try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/sagas/${currentOrder.sagaId}`);
-        const data = await res.json();
-        setSagaData(data);
-        
-        if (data.status === 'COMPLETED' || data.status === 'COMPENSATED' || data.status === 'FAILED') {
-          clearInterval(interval);
-        }
-      } catch (err) {
-        console.error("Failed to fetch saga", err);
-      }
-    }, 1500);
-
-    return () => clearInterval(interval);
-  }, [currentOrder]);
-
-  if (!currentOrder) {
+  if (!currentOrder || (!currentOrder.donHang && !currentOrder.message)) {
     return <Navigate to="/" />;
   }
 
-  const isFailureFlow = currentOrder.isFailureFlow;
-  
-  // Mapping history to UI Stepper
-  const allPossibleSteps = [
-    { key: 'SAGA_STARTED', title: 'Saga Started', service: 'orchestrator' },
-    { key: 'ORDER_CREATED', title: 'Order Created', service: 'order-service' },
-    { key: 'INVENTORY_RESERVED', title: 'Inventory Reserved', service: 'inventory-service' },
-    { key: 'PAYMENT_COMPLETED', title: 'Payment Processed', service: 'payment-service' },
-    { key: 'SHIPPING_CREATED', title: 'Shipment Created', service: 'shipping-service' },
-    { key: 'ORDER_CONFIRMED', title: 'Order Completed', service: 'order-service' },
-    // Compensation steps:
-    { key: 'PAYMENT_REFUNDED', title: 'Payment Refunded', service: 'payment-service', isComp: true },
-    { key: 'INVENTORY_RELEASED', title: 'Inventory Released', service: 'inventory-service', isComp: true },
-    { key: 'ORDER_CANCELLED', title: 'Order Cancelled', service: 'order-service', isComp: true },
-    { key: 'SAGA_ROLLED_BACK', title: 'Saga Rolled Back', service: 'orchestrator', isComp: true }
-  ];
+  const { donHang, thanhToan, lichSuKho, message, hoanTien } = currentOrder;
 
-  const history = sagaData ? sagaData.history : [];
-  
-  // We only show steps that have been reached, plus the current "processing/failing" step if any
-  const displayedSteps = allPossibleSteps.filter(step => {
-    // Show if it's in history
-    if (history.includes(step.key)) return true;
-    
-    // Show the next logical step as "pending/processing"
-    // Success path logic
-    if (!sagaData) return step.key === 'SAGA_STARTED';
-    
-    if (sagaData.status === 'RUNNING' && !isFailureFlow) {
-      const nextExpected = allPossibleSteps.find(s => !history.includes(s.key) && !s.isComp);
-      if (nextExpected && step.key === nextExpected.key) return true;
-    }
-    
-    return false;
-  });
+  const isSuccess = donHang?.trangThai === 'THANH_CONG';
 
-  // If a failure happens, we inject an error step dynamically based on what failed
-  const failedStepMsg = sagaData && sagaData.errorMessage ? sagaData.errorMessage : "Failed Step";
-  if (sagaData && (sagaData.status === 'COMPENSATING' || sagaData.status === 'FAILED' || sagaData.status === 'COMPENSATED')) {
-    // ensure we inject the error right after the last normal success step
-    const hasErrorPushed = displayedSteps.find(s => s.isError);
-    if (!hasErrorPushed) {
-      // Find the first compensation step index or just push at the end of normal steps
-      const compIndex = displayedSteps.findIndex(s => s.isComp);
-      const insertAt = compIndex !== -1 ? compIndex : displayedSteps.length;
-      displayedSteps.splice(insertAt, 0, {
-        key: 'ERROR_STATE',
-        title: 'Failure Detected',
-        service: 'orchestrator',
-        isError: true,
-        desc: failedStepMsg
-      });
+  const getStatusBadge = (status) => {
+    switch (status) {
+      case 'THANH_CONG':
+      case 'DA_TRU_TIEN':
+      case 'TRU_KHO_THANH_CONG':
+      case 'DA_XAC_NHAN':
+        return <span className="badge badge-success">{status}</span>;
+      case 'THAT_BAI':
+      case 'ROLLBACK':
+      case 'DA_HOAN_TIEN':
+      case 'THAT_BAI_DO_SO_DU':
+      case 'KHONG_TUONG_TAC_KHO':
+      case 'TU_CHOI_THANH_TOAN':
+      case 'KHONG_XU_LY':
+        return <span className="badge badge-error">{status}</span>;
+      case 'GIU_CHO':
+        return <span className="badge badge-warning">{status}</span>;
+      default:
+        return <span className="badge badge-secondary">{status}</span>;
     }
+  };
+
+  const getStatusIcon = (status) => {
+      if (['THANH_CONG', 'DA_TRU_TIEN', 'TRU_KHO_THANH_CONG', 'DA_XAC_NHAN'].includes(status)) {
+          return <CheckCircle2 className="icon-success" size={24} />;
+      }
+      if (['THAT_BAI', 'THAT_BAI_DO_SO_DU', 'TU_CHOI_THANH_TOAN'].includes(status)) {
+          return <XCircle className="icon-error" size={24} />;
+      }
+      if (['ROLLBACK', 'DA_HOAN_TIEN'].includes(status)) {
+          return <AlertCircle className="icon-compensation" size={24} />;
+      }
+      if (['GIU_CHO'].includes(status)) {
+          return <Clock className="icon-warning" size={24} />;
+      }
+      return <Clock size={24} />;
   }
 
-  const isComplete = sagaData && (sagaData.status === 'COMPLETED' || sagaData.status === 'COMPENSATED');
+  // hoanTien can be present instead of thanhToan on failure
+  const paymentLogs = thanhToan || hoanTien || [];
+  const inventoryLogs = lichSuKho || [];
 
   return (
     <div className="status-container pb-8">
-      <div className="status-header card mb-4">
-        <h2>Order Status</h2>
-        <div className="order-meta">
-          <p><strong>Saga ID:</strong> {currentOrder.sagaId}</p>
-          <p><strong>Order ID:</strong> {currentOrder.orderId || 'Pending...'}</p>
-          <p><strong>Total Amount:</strong> ${currentOrder.total.toLocaleString()}</p>
-          <p><strong>Status:</strong> <span style={{fontWeight:'bold'}}>{sagaData ? sagaData.status : 'INITIALIZING'}</span></p>
+      <div className="status-header card mb-4 text-center">
+        {isSuccess ? 
+          <CheckCircle2 className="mx-auto block icon-success mb-2" size={48} /> : 
+          <XCircle className="mx-auto block icon-error mb-2" size={48} />}
+        <h2>{message}</h2>
+        <div className="order-meta mt-4 flex flex-col items-center">
+          <p className="mb-2"><strong>Khách Hàng:</strong> {donHang?.nguoiMua}</p>
+          <div className="flex items-center gap-2">
+            <strong>Trạng thái Đơn Hàng:</strong> {getStatusBadge(donHang?.trangThai)}
+          </div>
         </div>
       </div>
 
-      <div className="saga-visualizer card">
-        <h3 className="section-title">Saga Orchestrator Timeline</h3>
-        <p className="subtitle">Polling /sagas/{currentOrder.sagaId} from backend</p>
-        
-        <div className="stepper">
-          {displayedSteps.map((step, index) => {
-             const isLastReached = history.includes(step.key) && index === displayedSteps.length - 1 && sagaData?.status === 'RUNNING';
-             const isProcessingNode = !history.includes(step.key) && !step.isError;
-             const isPastNode = history.includes(step.key) || isComplete || step.isError;
-             
-             let stepClass = 'step past';
-             if (isProcessingNode || isLastReached) stepClass = 'step active';
-             if (step.isError) stepClass = 'step has-error';
-             if (step.isComp) stepClass = 'step is-compensation';
-
-             const renderIcon = () => {
-               if (step.isError) return <XCircle className="icon-error" size={28} />;
-               if (step.isComp) return <AlertCircle className="icon-compensation" size={28} />;
-               if (isProcessingNode || isLastReached) return <Clock className="icon-processing pulse" size={28} />;
-               return <CheckCircle2 className="icon-success" size={28} />;
-             };
-
-             return (
-               <div key={step.key} className={stepClass}>
-                 <div className="step-indicator">
-                   {renderIcon()}
-                   {index < displayedSteps.length - 1 && <div className="step-line" />}
-                 </div>
-                 <div className="step-content">
-                   <h4 className="step-title">{step.title}</h4>
-                   <div className="service-badge">{step.service}</div>
-                   {step.desc && <p className="step-desc">{step.desc}</p>}
-                 </div>
-               </div>
-             );
-          })}
+      <div className="grid-2">
+        <div className="saga-visualizer card">
+            <h3 className="section-title">Lịch Sử Thanh Toán / Thất Bại</h3>
+            <div className="log-list mt-4">
+               {paymentLogs.length > 0 ? paymentLogs.map((log, i) => (
+                   <div key={i} className="log-item flex justify-between items-center bg-gray-50 p-4 mb-2 rounded border">
+                       <div>
+                           <div className="text-sm text-gray-500">Mã Đơn:</div>
+                           <div className="font-medium">{log.maDon}</div>
+                       </div>
+                       <div className="flex items-center gap-2">
+                           {getStatusIcon(log.trangThai)}
+                           {getStatusBadge(log.trangThai)}
+                       </div>
+                   </div>
+               )) : <p>Không có dữ liệu</p>}
+            </div>
         </div>
 
-        {isComplete && (
-          <div className="saga-completion text-center mt-8">
-            <h3 className={isFailureFlow ? 'text-error' : 'text-success'}>
-              {isFailureFlow ? 'Saga Rolled Back Successfully' : 'Saga Completed Successfully'}
-            </h3>
-            <Link to="/" className="btn-primary mt-4">Return to Home</Link>
-          </div>
-        )}
+        <div className="saga-visualizer card">
+            <h3 className="section-title">Lịch Sử Kho Hàng</h3>
+            <div className="log-list mt-4">
+               {inventoryLogs.length > 0 ? inventoryLogs.map((log, i) => (
+                   <div key={i} className="log-item flex justify-between items-center bg-gray-50 p-4 mb-2 rounded border">
+                       <div>
+                           <div className="text-sm text-gray-500">Mã Đơn:</div>
+                           <div className="font-medium">{log.maDon}</div>
+                       </div>
+                       <div className="flex items-center gap-2">
+                           {getStatusIcon(log.trangThai)}
+                           {getStatusBadge(log.trangThai)}
+                       </div>
+                   </div>
+               )) : <p>Không có dữ liệu</p>}
+            </div>
+        </div>
+      </div>
+
+      <div className="text-center mt-8">
+        <Link to="/" className="btn-primary">Quay Về Trang Chủ</Link>
       </div>
     </div>
   );

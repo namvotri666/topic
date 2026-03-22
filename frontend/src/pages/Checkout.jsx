@@ -5,7 +5,7 @@ import { MapPin, CreditCard } from 'lucide-react';
 import './Checkout.css';
 
 const Checkout = () => {
-  const { user, cart, clearCart, setCurrentOrder } = useAppContext();
+  const { user, cart, clearCart, setCurrentOrder, updateUserAmount } = useAppContext();
   const navigate = useNavigate();
   const [paymentMethod, setPaymentMethod] = useState('COD');
   const [simulateFailureAt, setSimulateFailureAt] = useState('none');
@@ -45,13 +45,11 @@ const Checkout = () => {
       });
       const data = await resp.json();
 
-      // Even if it failed (400), saga was executed and logged
-      setCurrentOrder({
-        sagaId: data.sagaId,
-        orderId: data.orderId,
-        total: totalPayment,
-        isFailureFlow: !data.success
-      });
+      // Orchestrator returns { donHang, thanhToan/hoanTien, lichSuKho, khachHang, message }
+      setCurrentOrder(data);
+      if (data.khachHang && data.khachHang.amount !== undefined) {
+          updateUserAmount(data.khachHang.amount);
+      }
 
       clearCart();
       navigate('/order-status');

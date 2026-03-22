@@ -22,7 +22,7 @@ const MainLayout = () => {
           <Link to="/" className="logo">
             Shopee
           </Link>
-          
+
           <div className="search-bar">
             <input type="text" placeholder="Search for products, brands..." className="search-input" />
             <button className="search-btn">
@@ -37,10 +37,11 @@ const MainLayout = () => {
             </Link>
             <div className="user-profile flex items-center gap-2">
               <img src={user.avatar} alt="avatar" className="avatar" />
-              
+
               <div className="user-info">
                 <span className="user-name">{user.name}</span>
-                <span className="user-username">@{user.username}</span>
+                <span className="user-username" >                            {user.username}</span>
+                <span className="user-username" style={{ color: "yellow" }}>Số dư: {user.amount ? user.amount.toLocaleString() : 0}$</span>
               </div>
 
               <button onClick={handleLogout} className="logout-btn" title="Logout">

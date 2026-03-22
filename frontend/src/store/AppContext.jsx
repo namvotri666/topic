@@ -90,6 +90,15 @@ export const AppProvider = ({ children }) => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
   };
 
+  const updateUserAmount = (newAmount) => {
+    setUser(prev => {
+      if (!prev) return prev;
+      const updatedUser = { ...prev, amount: newAmount };
+      localStorage.setItem('shopee_saga_user', JSON.stringify(updatedUser));
+      return updatedUser;
+    });
+  };
+
   const addToCart = (product, quantity) => {
     setCart(prev => {
       const existing = prev.find(item => item.product.productId === product.productId);
@@ -121,7 +130,7 @@ export const AppProvider = ({ children }) => {
 
   return (
     <AppContext.Provider value={{
-      user, login, logout,
+      user, login, logout, updateUserAmount,
       cart, addToCart, updateCartQuantity, removeFromCart, clearCart,
       currentOrder, setCurrentOrder
     }}>

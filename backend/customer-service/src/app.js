@@ -10,9 +10,9 @@ const JWT_SECRET = 'shopee-saga-super-secret';
 const TOKEN_EXPIRES_IN = '5m';
 
 const customers = [
-  { id: "C001", name: "John Buyer", email: "john@shopee.mock", password: "password123", phone: "0123456789", defaultAddress: "123 Nguyen Trai, Ha Noi", avatar: "https://ui-avatars.com/api/?name=John+Buyer&background=ee4d2d&color=fff", balance: 1000000 },
-  { id: "C002", name: "Jane Smith", email: "jane@shopee.mock", password: "password123", phone: "0987654321", defaultAddress: "456 Le Loi, Ho Chi Minh", avatar: "https://ui-avatars.com/api/?name=Jane+Smith&background=ee4d2d&color=fff", balance: 2000000 },
-  { id: "C003", name: "Bob Johnson", email: "bob@shopee.mock", password: "password123", phone: "0333222111", defaultAddress: "789 Tran Phu, Da Nang", avatar: "https://ui-avatars.com/api/?name=Bob+Johnson&background=ee4d2d&color=fff", balance: 3000000 }
+  { id: "C001", name: "John Buyer", email: "john@shopee.mock", password: "password123", phone: "0123456789", defaultAddress: "123 Nguyen Trai, Ha Noi", avatar: "https://ui-avatars.com/api/?name=John+Buyer&background=ee4d2d&color=fff", amount: 10000 },
+  { id: "C002", name: "Jane Smith", email: "jane@shopee.mock", password: "password123", phone: "0987654321", defaultAddress: "456 Le Loi, Ho Chi Minh", avatar: "https://ui-avatars.com/api/?name=Jane+Smith&background=ee4d2d&color=fff", amount: 200000 },
+  { id: "C003", name: "Bob Johnson", email: "bob@shopee.mock", password: "password123", phone: "0333222111", defaultAddress: "789 Tran Phu, Da Nang", avatar: "https://ui-avatars.com/api/?name=Bob+Johnson&background=ee4d2d&color=fff", amount: 3000000 }
 ];
 
 // Authentication Middleware
@@ -21,7 +21,7 @@ const requireAuth = (req, res, next) => {
   if (!authHeader) return res.status(401).json({ success: false, message: 'No token provided' });
 
   const token = authHeader.split(' ')[1]; // "Bearer <token>"
-  
+
   jwt.verify(token, JWT_SECRET, (err, decoded) => {
     if (err) {
       return res.status(401).json({ success: false, message: 'Invalid or expired token' });
@@ -34,7 +34,7 @@ const requireAuth = (req, res, next) => {
 // POST /login
 app.post('/login', (req, res) => {
   const { email, password } = req.body;
-  
+
   const customer = customers.find(c => c.email === email);
   if (!customer || customer.password !== password) {
     return res.status(401).json({ success: false, message: 'Invalid email or password' });
@@ -57,7 +57,7 @@ app.post('/login', (req, res) => {
 app.get('/me', requireAuth, (req, res) => {
   const customer = customers.find(c => c.id === req.user.id);
   if (!customer) return res.status(404).json({ success: false, message: 'Customer not found' });
-  
+
   const { password, ...customerProfile } = customer;
   res.json({ success: true, user: customerProfile });
 });
@@ -73,9 +73,22 @@ app.get('/customers', (req, res) => {
 app.get('/customers/:id', (req, res) => {
   const customer = customers.find(c => c.id === req.params.id);
   if (!customer) return res.status(404).json({ success: false, message: 'Customer not found' });
-  
+
   const { password, ...customerProfile } = customer;
   res.json(customerProfile);
+});
+
+// PATCH /customers/:id/amount
+app.patch('/customers/:id/amount', (req, res) => {
+  const customer = customers.find(c => c.id === req.params.id);
+  if (!customer) return res.status(404).json({ success: false, message: 'Customer not found' });
+
+  const { delta } = req.body; // e.g., -20000 to deduct, +20000 to add back
+  if (typeof delta !== 'number') return res.status(400).json({ success: false, message: 'Invalid delta' });
+
+  customer.amount += delta;
+  const { password, ...customerProfile } = customer;
+  res.json({ success: true, user: customerProfile });
 });
 
 const PORT = 5001;
